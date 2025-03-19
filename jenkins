@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('scm') {
+            steps {
+                git branch: 'main', url: 'https://github.com/BharathPrabakar/DevOps-Guvi.git'
+            }
+        }
+        stage('build') {
+            steps {
+                bat "mvn clean"
+                bat "mvn install"
+            }
+        }
+        stage('build to images') {
+            steps {
+                script {
+                    bat 'docker build -t bharathprabakaran/simplewebapp .'
+                }
+            }
+        }
+        stage('push to hub') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker_cred', url: 'https://index.docker.io/v1/') {
+                        bat 'docker push bharathprabakaran/simplewebapp'
+                    }
+                }
+            }
+        }
+    }
+}
